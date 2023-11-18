@@ -1,6 +1,6 @@
 import pytest
-from peekable import peekable
-from jon import parse_token, loads
+from src.peekable import peekable
+from src.jon import parse_token, loads
 
 # test case parameters
 test_data = [
@@ -24,6 +24,7 @@ def test_parse_token(code_str, expected_output):
 json_test_data = [("{}", {}),
   ('{"key": "value"}', {"key": "value"}),
   ('{"key1": "value1", "key2": "value2"}', {"key1": "value1", "key2": "value2"}),
+  ('{"parent": {"child": "value"}}', {"parent": {"child": "value"}}),
   ('{"parent": {"child": "value"}}', {"parent": {"child": "value"}}),
   ('{"parent": {"child1": "value1", "child2": "value2"}}', {"parent": {"child1": "value1", "child2": "value2"}}),
   ('{"array": [1, 2, 3]}', {"array": [1, 2, 3]}),

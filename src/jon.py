@@ -1,16 +1,23 @@
 import sys
 import itertools
 
-from peekable import peekable
+from .peekable import peekable
 from decimal import Decimal
 
 def ignore_ws(code: peekable):
     while code and code.peek() in ' \n\r\t':
         next(code)
 
+"""
 from decimal import Decimal
+NUM_TYPE = Decimal
+USE_DECIMAL = True
+"""
+NUM_TYPE = float | int
+USE_DECIMAL = False
 
-def convert_token(input_str: str) -> Decimal | bool | None | str:
+
+def convert_token(input_str: str) -> bool | None | str | NUM_TYPE:
     try:
         # return Decimal(input_str)
         try:
@@ -120,22 +127,34 @@ def parse_obj(code: peekable):
             break
         key, value = parse_obj_entry(code)
         obj[key] = value
-        ignore_ws(code)
         if code:
             if code.peek() == "}":
                 next(code)
                 break
             elif code.peek() == ",":
+                if not proper_obj:
+                    break
                 next(code)
                 continue
-            elif not proper_obj or code.peek() in "[]{:":
+            elif code.peek() in "[]{:":
                 break
+            elif not proper_obj:
+                # breaking here causes a: 1 b: 2 to be two objects in an array
+                # break
+                pass
     return obj
 
 def parse(code: peekable, in_array=False, in_obj=False):
     ignore_ws(code)
+    if code.peek() == "}":
+        return None
     if code.peek() == '{':
-        return parse_obj(code)
+        obj = parse_obj(code)
+        ignore_ws(code)
+        if code and not in_array and not code.peek() in "}]":
+            return [obj, *parse(code)]
+        else:
+            return obj
     elif code.peek() == '[':
         return parse_array(code)
     token = parse_token(code)
@@ -147,6 +166,8 @@ def parse(code: peekable, in_array=False, in_obj=False):
         obj = parse_obj(code)
         ignore_ws(code)
         if code and not in_array:
+            if code.peek() == ",":
+                next(code)
             return [obj, *parse_array(code)]
         else:
             return obj
@@ -160,3 +181,12 @@ def loads(code_str: str):
     code = peekable(code_str)
     return parse(code)
 
+
+if __name__ == "__main__":
+    import probe
+    #probe.trace_calls(__file__)
+    import sys
+    print(loads(sys.stdin.read()))
+else:
+    import probe
+    #probe.trace_calls(__file__)

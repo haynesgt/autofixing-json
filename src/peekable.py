@@ -2,6 +2,7 @@
 # https://github.com/more-itertools/more-itertools/blob/master/more_itertools/more.py
 
 from collections import deque
+from itertools import islice
 
 _marker = object()
 
@@ -93,6 +94,22 @@ class peekable:
                     raise
                 return default
         return self._cache[0]
+
+    def peek_many(self, n, default=_marker):
+        """Return the next ``n`` items that will be returned from ``next()``.
+
+        Return ``default`` if there are fewer than ``n`` items left. If
+        ``default`` is not provided, raise ``StopIteration``.
+
+        """
+        if not self._cache:
+            try:
+                self._cache.extend(islice(self._it, n))
+            except StopIteration:
+                if default is _marker:
+                    raise
+                return default
+        return list(self._cache)[:n]
 
     def prepend(self, *items):
         """Stack up items to be the next ones returned from ``next()`` or
