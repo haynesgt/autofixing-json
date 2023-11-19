@@ -38,3 +38,23 @@ json_test_data = [("{}", {}),
 @pytest.mark.parametrize("code_str,expected_output", json_test_data)
 def test_loads(code_str, expected_output):
     assert loads(code_str) == expected_output
+
+complex_tests = [
+  ('', None),
+  ('a:', {"a": None}),
+  ('a:1', {"a": 1}),
+  ('a:1 b:2', {"a": 1, "b": 2}),
+  ('a:1, b:2', [{"a": 1}, {"b": 2}]),
+  ('a: b: 1 c: 2', {"a": {"b": 1, "c": 2}}),
+  ('a: b: 1 c: d: 2', {"a": {"b": 1, "c": {"d": 2}}}),
+  ('a: b: 1, c', {"a": [{"b": 1}, "c"]}),
+  ('a: b: 1 :a c: 2', {"a": {"b":1}, "c": 2}),
+]
+
+@pytest.mark.parametrize("code_str,expected_output", complex_tests)
+def test_complex(code_str, expected_output):
+    assert loads(code_str) == expected_output
+
+"""
+
+"""

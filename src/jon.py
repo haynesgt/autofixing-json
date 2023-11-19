@@ -98,7 +98,7 @@ def parse_array(code: peekable):
         if code and code.peek() == ",":
             next(code)
             ignore_ws(code)
-        if code and code.peek() == "]":
+        elif code and code.peek() in "]}":
             next(code)
             break
     return values
@@ -146,6 +146,8 @@ def parse_obj(code: peekable):
 
 def parse(code: peekable, in_array=False, in_obj=False):
     ignore_ws(code)
+    if not code:
+        return None
     if code.peek() == "}":
         return None
     if code.peek() == '{':
@@ -165,7 +167,7 @@ def parse(code: peekable, in_array=False, in_obj=False):
         code.prepend(*token)
         obj = parse_obj(code)
         ignore_ws(code)
-        if code and not in_array:
+        if code and not in_array and not code.peek() in "}]":
             if code.peek() == ",":
                 next(code)
             return [obj, *parse_array(code)]
@@ -183,10 +185,11 @@ def loads(code_str: str):
 
 
 if __name__ == "__main__":
-    import probe
+    #import probe
     #probe.trace_calls(__file__)
     import sys
     print(loads(sys.stdin.read()))
 else:
-    import probe
+    #import probe
     #probe.trace_calls(__file__)
+    pass
